@@ -2,26 +2,137 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
 #include "btree.h"
-#define pmalloc (Node *) malloc(sizeof(Node));
 
-Node * populate_tree(Node * tree, char *filename);
-Node * addToTree(Node * node, Node * current);
-Node * newNode(Node * current);
-void printTree(Node * tree);
-void freeTree(Node * tree);
+char * filename = "pms.txt";
 
-int main(void)
+int main()
+{
+  char sentinel = '1';
+  
+  do
+    {
+      printf("Welcome to ACME Solutions Personnel Management System\n");
+      printf("\nPlease select one of the following options:\n");
+      printf("1: Add employee to list\n");
+      printf("2: Remove employee to list\n");
+      printf("3: List all employees\n");
+      printf("0: Exit program\n");
+      
+      sentinel = getchar();
+      char * name1 = (char *) malloc(sizeof(21));
+      char * name2 = (char *) malloc(sizeof(21));
+      Node * tree = NULL;
+      
+      switch(sentinel)
+	{
+	case '0':
+	  getchar();
+	  printf("Thank you, goodbye.\n");
+	  sleep(2);
+	  break;
+	  
+	case '1':
+	  printf("Please enter employee first name:\n");
+	  getchar();
+	  fgets(name1, 21, stdin);
+	  printf("Please enter employee last name:\n");
+	  fgets(name2, 21, stdin);
+
+	  printf("Checking for duplicate name...\n");
+	  checkExisting(name1, name2);
+	  break;
+
+	case '2':
+	  break;
+
+	case '3':
+	  getchar();
+	  tree = populate_tree(tree);
+	  printTree(tree);
+	  printf("\n");
+	  freeTree(tree);
+	  free(name1);
+	  free(name2);
+	  break;
+
+	default:
+	  break;
+	}
+    }while(sentinel != '0');
+}
+
+void checkExisting(char * first_name, char * last_name)
+{
+  FILE *file = fopen(filename, "r");
+  char * tfname = (char *) malloc(sizeof(21));
+  char * tlname = (char *) malloc(sizeof(21));
+  
+  // catch any file errors
+  if(!file)
+    {
+      printf("%s\n", strerror(errno));
+      exit(1);
+    }
+
+
+  printf("Looking for: %s %s", first_name, last_name);
+  while(fgets(tfname, 21, file) != EOF)
+    {
+      fgets(tlname, 21, file);
+      printf("TEST 1: %s\t%s\n", tfname, tlname);
+      int test = strcmp(tfname,first_name);
+      printf("Compare value: %d\n", test);
+      if(strcmp(tfname,first_name) == 0)
+	{
+	  printf("MATCHING");
+	  if(strcmp(tlname,last_name) == 0)
+	    {
+	      printf("Employee already in system.\n\n");
+	      break;
+	    }
+	  else
+	    {
+	      // addToFile(first_name,last_name);
+	      continue;
+	    }
+	}
+      else
+	{
+	  // addToFile(first_name,last_name);
+	  continue;
+	}
+    }
+}
+
+void addToFile(char * first_name, char * last_name)
+{
+  FILE * file = fopen(filename, "a");
+
+  // catch any file errors
+  if(!file)
+    {
+      printf("%s\n", strerror(errno));
+      exit(1);
+    }
+  printf("Adding employee to file...\n\n");
+  fprintf(file, "%s", first_name);
+  fprintf(file, "%s", last_name);
+  fclose(file);
+}
+
+int test_everything()
 {
   Node * tree = NULL;
-  tree = populate_tree(tree, "names.txt");
+  tree = populate_tree(tree);
   printf("First name\t\tLast name\n");
   printf("---------------------------------\n");
   printTree(tree);
   freeTree(tree);
 }
 
-Node * populate_tree(Node * node, char * filename)
+Node * populate_tree(Node * node)
 {
   FILE *file = fopen(filename, "rt");
   Node * current = NULL;
@@ -42,6 +153,7 @@ Node * populate_tree(Node * node, char * filename)
       node = addToTree(node,current);
     }
 
+  fclose(file);
   return node;
 }
 

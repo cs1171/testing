@@ -10,4 +10,13 @@ typedef struct Node
   struct Node* right,*left;
 }Node;
 
+#define pmalloc (Node *) malloc(sizeof(Node));
+Node * populate_tree(Node * tree);
+void checkExisting(char * first_name, char * last_name);
+void addToFile(char * first_name, char * last_name);
+Node * addToTree(Node * node, Node * current);
+Node * newNode(Node * current);
+void printTree(Node * tree);
+void freeTree(Node * tree);
+
 #endif
