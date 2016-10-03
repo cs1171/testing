@@ -2,14 +2,14 @@ INSTPATH = ./
 
 all: btree
 
-test: btree.o
-	cc -o btree btree.o
+btree: btree.o main.o
+	cc -o btree btree.o main.o
 
-btree.o: btree.s
-	cc -c btree.s
+btree.o: btree.c btree.h
+	cc -c btree.c
 
-btree.s: btree.c
-	cc -S btree.c
+main.o: main.c btree.h
+	cc -c main.c
 
 clean:
 	rm -rf *~ *.*~ *.o *.s btree
